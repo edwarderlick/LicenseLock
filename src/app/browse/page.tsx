@@ -74,7 +74,8 @@ export default function BrowseClaims() {
           })
         );
         
-        setClaims(claimsData.reverse()); // Show newest first
+        const validClaims = claimsData.filter((c: any) => c && c.claim_type !== "SEMANTIC_AUDIT");
+        setClaims(validClaims.reverse()); // Show newest first
       } catch (error) {
         console.error("Failed to fetch claims", error);
       } finally {
@@ -86,7 +87,7 @@ export default function BrowseClaims() {
 
   // Filtered claims logic
   const filteredClaims = claims.filter((claim) => {
-    if (!claim) return false;
+    if (!claim || claim.claim_type === "SEMANTIC_AUDIT") return false;
     
     // State filtering
     if (stateFilter !== "ALL" && claim.state !== stateFilter) {

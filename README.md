@@ -1,6 +1,7 @@
 # 🛡️ LicenseLock
 
-**Institutional-Grade Open-Source License Escrow on GenLayer.** Lock GEN tokens against a GitHub commit, trigger decentralized validators to perform mechanical license verification, and settle payouts or refunds based purely on on-chain verification.
+**Open-Source License Escrow on GenLayer.** Lock GEN tokens against a GitHub commit, trigger decentralized validators to perform mechanical license verification, and settle payouts or refunds based purely on on-chain verification.
+
 
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000.svg)](https://nextjs.org)

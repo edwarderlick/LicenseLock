@@ -127,8 +127,11 @@ export default function MyClaims() {
           args: [account],
         });
 
-        setFunderClaims(Array.isArray(asFunder) ? asFunder : []);
-        setRecipientClaims(Array.isArray(asRecipient) ? asRecipient : []);
+        const validFunder = (Array.isArray(asFunder) ? asFunder : []).filter((c) => c && c.claim_type !== "SEMANTIC_AUDIT");
+        const validRecipient = (Array.isArray(asRecipient) ? asRecipient : []).filter((c) => c && c.claim_type !== "SEMANTIC_AUDIT");
+
+        setFunderClaims(validFunder);
+        setRecipientClaims(validRecipient);
       } catch (err: any) {
         console.error("Failed to fetch claims:", err);
         setFunderClaims([]);
@@ -148,7 +151,7 @@ export default function MyClaims() {
 
   const applyFilters = (list: Claim[]) => {
     return list.filter((claim) => {
-      if (!claim) return false;
+      if (!claim || claim.claim_type === "SEMANTIC_AUDIT") return false;
       if (stateFilter !== "ALL" && claim.state !== stateFilter) return false;
       if (typeFilter !== "ALL" && claim.claim_type !== typeFilter) return false;
       if (searchQuery.trim()) {

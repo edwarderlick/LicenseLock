@@ -49,6 +49,13 @@ export default function ClaimDetail({ params }: { params?: { id?: string } }) {
       });
 
       console.log(`[LicenseLock] get_claim("${id}") result:`, safeJsonStringify(data));
+      
+      if (data && data.claim_type === "SEMANTIC_AUDIT") {
+        setClaim(null);
+        setError(`Claim "${id}" is unsupported or legacy.`);
+        return;
+      }
+
       setClaim(data);
       setError(null);
     } catch (err: any) {
