@@ -47,3 +47,5 @@ __pycache__/
 artifacts/
 *.pyc
 
+
+.vercel
