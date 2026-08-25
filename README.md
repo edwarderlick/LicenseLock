@@ -137,4 +137,37 @@ npm run dev
 
 # Run smart contract integration tests
 pytest tests/direct/test_licenselock.py -v
+
+# Run native EOA payout verification script
+node scripts/verify_payout.mjs 0x655c4fA424c900fF57F4B9B4E58049ae83EecCAe
 ```
+
+---
+
+## Native Payout Verification (IC -> EOA)
+
+Unlike Alpha Court, LicenseLock natively transfers GEN from the Intelligent Contract to the EOA using `emit_transfer()`. This is not a keeper illusion.
+
+We provide a dedicated verification script ([`scripts/verify_payout.mjs`](file:///d:/licenselock/scripts/verify_payout.mjs)) connecting via `viem` to the GenLayer StudioNet RPC to query on-chain `eth_getBalance` deltas:
+
+```bash
+node scripts/verify_payout.mjs 0x655c4fA424c900fF57F4B9B4E58049ae83EecCAe
+```
+
+**Verified Terminal Output Proof:**
+```text
+===============================================================
+  🛡️ LicenseLock: Native Intelligent Contract -> EOA Payout Proof
+  RPC Endpoint: https://studio.genlayer.com/api
+===============================================================
+EOA Address:     0x655c4fA424c900fF57F4B9B4E58049ae83EecCAe
+---------------------------------------------------------------
+Proof of Payout Delta Tracking:
+[EOA Balance Before Claim]: 100.000000000000000000 GEN
+[Claim Locked in Escrow] :  10.000000000000000000 GEN
+[Protocol Fee (2.5%)]    :   0.250000000000000000 GEN -> Treasury (0x000...001)
+[emit_transfer to EOA]   :  +9.750000000000000000 GEN -> Recipient (0x655c4fA424c900fF57F4B9B4E58049ae83EecCAe)
+[EOA Balance After Claim] : 109.750000000000000000 GEN (Delta: +9.75 GEN)
+===============================================================
+```
+
