@@ -218,7 +218,6 @@ export default function ClaimPending({
                   {claim.claim_type === 'SPDX_MATCH' ? 'SPDX License Identifier Match' : 
                    claim.claim_type === 'NO_COPYLEFT' ? 'No Copyleft Licenses' : 
                    claim.claim_type === 'ALLOWED_LICENSE_SET' ? 'Allowed Licenses Set' : 
-                   claim.claim_type === 'SEMANTIC_AUDIT' ? 'Semantic AI Audit (GenVM LLM)' : 
                    claim.claim_type}
                 </span>
               </div>
@@ -230,8 +229,6 @@ export default function ClaimPending({
                    claim.claim_type === 'NO_COPYLEFT' ? 'No GPL/AGPL/LGPL in LICENSE or manifest' : 
                    claim.claim_type === 'ALLOWED_LICENSE_SET' ? (
                      claim.allowed_licenses_json ? JSON.parse(claim.allowed_licenses_json).join(" OR ") : "Configured Set"
-                   ) : claim.claim_type === 'SEMANTIC_AUDIT' ? (
-                     claim.custom_policy_prompt ? `"${claim.custom_policy_prompt}"` : "AI Legal Policy Conformance"
                    ) : "N/A"}
                 </span>
               </div>
@@ -244,20 +241,9 @@ export default function ClaimPending({
                   </span>
                 </div>
               )}
-
-              {claim.custom_policy_prompt && (
-                <div className="flex flex-col py-4 border-b border-outline/20 md:col-span-2 bg-primary-fixed/5 px-4 my-2 border-l-2 border-primary-fixed">
-                  <span className="font-label-caps text-label-caps text-primary-fixed mb-1 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[16px]">psychology</span>
-                    Custom Policy Requirement (AI Prompt)
-                  </span>
-                  <p className="font-code-sm text-code-sm text-on-surface">
-                    "{claim.custom_policy_prompt}"
-                  </p>
-                </div>
-              )}
             </div>
           </section>
+
 
 
 

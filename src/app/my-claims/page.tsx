@@ -47,9 +47,8 @@ function ClaimRow({ claim }: { claim: Claim }) {
       ? "No Copyleft"
       : claim.claim_type === "ALLOWED_LICENSE_SET"
       ? "Allowed License Set"
-      : claim.claim_type === "SEMANTIC_AUDIT"
-      ? "Semantic AI Audit"
       : claim.claim_type;
+
 
 
   return (

@@ -65,7 +65,6 @@ export default function ClaimResolved({ claim }: { claim: any }) {
   {claim.claim_type === 'SPDX_MATCH' ? 'SPDX Match' : 
    claim.claim_type === 'NO_COPYLEFT' ? 'No Copyleft' : 
    claim.claim_type === 'ALLOWED_LICENSE_SET' ? 'Allowed Licenses' : 
-   claim.claim_type === 'SEMANTIC_AUDIT' ? 'Semantic AI Audit' : 
    claim.claim_type}
 </span>
 </div>
@@ -86,15 +85,6 @@ export default function ClaimResolved({ claim }: { claim: any }) {
     <span className="font-code-sm text-code-sm text-primary-fixed bg-primary-fixed/10 px-2 py-0.5 border border-primary-fixed/20">
       {claim.target_directory}
     </span>
-  </div>
-)}
-{claim.custom_policy_prompt && (
-  <div className="mt-4 p-3 bg-primary-fixed/5 border border-primary-fixed/30 flex flex-col gap-1">
-    <span className="font-label-caps text-label-caps text-primary-fixed flex items-center gap-1.5">
-      <span className="material-symbols-outlined text-[16px]">psychology</span>
-      AI AUDIT POLICY PROMPT
-    </span>
-    <p className="font-code-sm text-code-sm text-on-surface">"{claim.custom_policy_prompt}"</p>
   </div>
 )}
 </header>
@@ -119,10 +109,11 @@ export default function ClaimResolved({ claim }: { claim: any }) {
   <>
     <div className={`font-body-md text-body-md text-on-surface font-medium bg-surface-container-high/60 p-3 border-l-2 ${isCanceled ? 'border-outline' : isPass ? 'border-primary-fixed' : isInsufficient ? 'border-outline' : 'border-error'}`}>
       <span className="font-label-caps text-label-caps text-on-surface-variant block mb-1">
-        {isCanceled ? 'STATUS DETAILS' : claim.claim_type === 'SEMANTIC_AUDIT' ? 'AI AUDITOR CONSENSUS REASONING' : 'VALIDATOR CONSENSUS REASONING'}
+        {isCanceled ? 'STATUS DETAILS' : 'VALIDATOR CONSENSUS REASONING'}
       </span>
       {resultData.reason}
     </div>
+
     <p className="font-code-sm text-code-sm text-on-surface-variant mt-1">
       {isCanceled
         ? 'The escrow has been refunded to the original funder.'

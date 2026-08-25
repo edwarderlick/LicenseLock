@@ -229,7 +229,8 @@ def test_cancel_claim_already_resolved(direct_vm, direct_deploy, direct_alice, d
     direct_vm.sender = direct_alice
     with pytest.raises(Exception) as excinfo:
         contract.cancel_claim(claim_id)
-    assert "not OPEN" in str(excinfo.value)
+    assert "Cannot cancel a claim" in str(excinfo.value)
+
 
 def test_resolve_monorepo_subdirectory(direct_vm, direct_deploy, direct_alice, direct_bob):
     contract = direct_deploy("contracts/licenselock.py")
@@ -272,38 +273,31 @@ def test_protocol_fee_deduction(direct_vm, direct_deploy, direct_alice, direct_b
     assert claim["state"] == "RESOLVED"
     assert claim["outcome"] == "PASS"
 
-def test_semantic_audit_pass(direct_vm, direct_deploy, direct_alice, direct_bob):
+def test_resolve_no_copyleft_no_false_positive_on_ordinary_words(direct_vm, direct_deploy, direct_alice, direct_bob):
+    """Ensure ordinary words like 'application' or 'template' in package.json description do not cause false copyleft failures."""
     contract = direct_deploy("contracts/licenselock.py")
     direct_vm.sender = direct_alice
-    direct_vm.value = 1000
+    direct_vm.value = 100
     
-    custom_prompt = "Must permit commercial usage and modification without copyleft viral terms"
-    claim_id = contract.create_claim(
-        "org/ai-repo",
-        "sha-ai",
-        direct_bob,
-        "SEMANTIC_AUDIT",
-        [],
-        "",
-        custom_prompt
-    )
+    claim_id = contract.create_claim("test/repo-safe", "sha-safe", direct_bob, "NO_COPYLEFT", [])
     
+    # LICENSE contains words like 'application' and 'template', but license is MIT
     mock_github_file(
         direct_vm,
-        "org/ai-repo",
-        "sha-ai",
+        "test/repo-safe",
+        "sha-safe",
         "LICENSE",
         200,
-        "MIT License\n\nPermission is hereby granted, free of charge..."
+        "MIT License\n\nPermission to use this web application and template library..."
     )
-    
-    # Mock GenVM LLM response
-    direct_vm.mock_llm(
-        ".*",
-        json.dumps({
-            "verdict": "PASS",
-            "reasoning": "The MIT license grants unrestricted commercial usage and modification with no copyleft obligations."
-        })
+    # package.json has description with 'application' and 'example', but declared license is MIT
+    mock_github_file(
+        direct_vm,
+        "test/repo-safe",
+        "sha-safe",
+        "package.json",
+        200,
+        '{"name": "my-application", "description": "Enterprise application template", "license": "MIT"}'
     )
     
     direct_vm.sender = direct_bob
@@ -313,135 +307,8 @@ def test_semantic_audit_pass(direct_vm, direct_deploy, direct_alice, direct_bob)
     assert claim["state"] == "RESOLVED"
     assert claim["outcome"] == "PASS"
     result = claim["result_json"] if isinstance(claim["result_json"], dict) else json.loads(claim["result_json"])
-    assert "MIT license grants unrestricted commercial usage" in result["reason"]
+    assert "No declared copyleft" in result["reason"]
 
-def test_semantic_audit_fail(direct_vm, direct_deploy, direct_alice, direct_bob):
-    contract = direct_deploy("contracts/licenselock.py")
-    direct_vm.sender = direct_alice
-    direct_vm.value = 1000
-    
-    custom_prompt = "Must permit closed-source proprietary distribution without source disclosure"
-    claim_id = contract.create_claim(
-        "org/gpl-repo",
-        "sha-gpl",
-        direct_bob,
-        "SEMANTIC_AUDIT",
-        [],
-        "",
-        custom_prompt
-    )
-    
-    mock_github_file(
-        direct_vm,
-        "org/gpl-repo",
-        "sha-gpl",
-        "LICENSE",
-        200,
-        "GNU GENERAL PUBLIC LICENSE Version 3..."
-    )
-    
-    # Mock LLM fail verdict
-    direct_vm.mock_llm(
-        ".*",
-        json.dumps({
-            "verdict": "FAIL",
-            "reasoning": "GPLv3 is a strong reciprocal copyleft license that requires complete source code disclosure upon distribution."
-        })
-    )
-    
-    direct_vm.sender = direct_bob
-    contract.resolve(claim_id)
-    
-    claim = contract.get_claim(claim_id)
-    assert claim["state"] == "RESOLVED"
-    assert claim["outcome"] == "FAIL"
-    result = claim["result_json"] if isinstance(claim["result_json"], dict) else json.loads(claim["result_json"])
-    assert "copyleft" in result["reason"].lower()
-
-def test_semantic_audit_conversational_padding(direct_vm, direct_deploy, direct_alice, direct_bob):
-    """Ensure regex extractor handles markdown fences and conversational wrapper text without crashing."""
-    contract = direct_deploy("contracts/licenselock.py")
-    direct_vm.sender = direct_alice
-    direct_vm.value = 1000
-    
-    claim_id = contract.create_claim(
-        "org/chat-repo",
-        "sha-chat",
-        direct_bob,
-        "SEMANTIC_AUDIT",
-        [],
-        "",
-        "Must be MIT compatible"
-    )
-    
-    mock_github_file(
-        direct_vm,
-        "org/chat-repo",
-        "sha-chat",
-        "LICENSE",
-        200,
-        "MIT License\n\nCopyright (c) 2026..."
-    )
-    
-    # Mock LLM returning conversational padding around markdown JSON
-    conversational_response = (
-        "Hello! I have completed your legal review.\n"
-        "Here is the evaluation payload:\n"
-        "```json\n"
-        "{\n"
-        '  "verdict": "PASS",\n'
-        '  "reasoning": "The repository is licensed under the permissive MIT license."\n'
-        "}\n"
-        "```\n"
-        "Let me know if you need anything else!"
-    )
-    direct_vm.mock_llm(".*", conversational_response)
-    
-    direct_vm.sender = direct_bob
-    contract.resolve(claim_id)
-    
-    claim = contract.get_claim(claim_id)
-    assert claim["state"] == "RESOLVED"
-    assert claim["outcome"] == "PASS"
-    result = claim["result_json"] if isinstance(claim["result_json"], dict) else json.loads(claim["result_json"])
-    assert "permissive mit license" in result["reason"].lower()
-
-def test_semantic_audit_garbled_output_safe_fallback(direct_vm, direct_deploy, direct_alice, direct_bob):
-    """Ensure garbled/non-JSON LLM responses never cause fatal revert and safely refund as INSUFFICIENT."""
-    contract = direct_deploy("contracts/licenselock.py")
-    direct_vm.sender = direct_alice
-    direct_vm.value = 1000
-    
-    claim_id = contract.create_claim(
-        "org/garbled-repo",
-        "sha-garbled",
-        direct_bob,
-        "SEMANTIC_AUDIT",
-        [],
-        "",
-        "Must be MIT compatible"
-    )
-    
-    mock_github_file(
-        direct_vm,
-        "org/garbled-repo",
-        "sha-garbled",
-        "LICENSE",
-        200,
-        "MIT License\n\nCopyright (c) 2026..."
-    )
-    
-    # Mock LLM returning totally unparsable string
-    direct_vm.mock_llm(".*", "I am unable to answer this question due to safety policies.")
-    
-    direct_vm.sender = direct_bob
-    contract.resolve(claim_id)
-    
-    claim = contract.get_claim(claim_id)
-    assert claim["state"] == "RESOLVED"
-    assert claim["outcome"] == "INSUFFICIENT"
-    result = claim["result_json"] if isinstance(claim["result_json"], dict) else json.loads(claim["result_json"])
-    assert "unparsable" in result["reason"].lower()
 
 
 

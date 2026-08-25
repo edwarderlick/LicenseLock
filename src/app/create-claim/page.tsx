@@ -110,7 +110,6 @@ export default function CreateClaim() {
 
       // Clean target directory
       const targetDirClean = (claimData.target_directory || "").trim().replace(/^\/+|\/+$/g, "");
-      const customPromptClean = (claimData.custom_policy_prompt || "").trim();
 
       // Safe decimal to 18-decimal wei conversion without floating point distortion
       const [whole = "0", fraction = ""] = claimData.amount.trim().split(".");
@@ -124,7 +123,6 @@ export default function CreateClaim() {
         claimType: claimData.claimType,
         allowedLicenses,
         targetDirectory: targetDirClean,
-        customPolicyPrompt: customPromptClean,
         value: valueWei.toString(),
       });
 
@@ -138,10 +136,10 @@ export default function CreateClaim() {
           claimData.claimType,
           allowedLicenses,
           targetDirClean,
-          customPromptClean,
         ],
         value: valueWei,
       });
+
 
 
       // Wallet signed — now waiting for on-chain confirmation
