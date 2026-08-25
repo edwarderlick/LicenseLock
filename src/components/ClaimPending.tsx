@@ -298,7 +298,7 @@ export default function ClaimPending({
             </div>
             <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">Evidence Report</h3>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              The cryptographic evidence report will be generated and immutably written to chain as soon as consensus resolution is executed.
+              The on-chain report will be generated and immutably written to chain as soon as consensus resolution is executed.
             </p>
             <div className="mt-6 flex items-center gap-2 px-3 py-1.5 bg-surface border border-outline/20 rounded-full">
               <span className="w-2 h-2 rounded-full bg-secondary animate-ping" />

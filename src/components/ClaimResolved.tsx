@@ -190,27 +190,6 @@ export default function ClaimResolved({ claim }: { claim: any }) {
 </div>
 {/* Right Column: Metadata & Timeline */}
 <aside className="col-span-12 lg:col-span-4 flex flex-col gap-8 lg:pl-8 border-l border-outline/20">
-{/* Transaction Hashes */}
-<div className="border border-outline/20 bg-surface-container p-6 shadow-sm">
-<h3 className="font-label-caps text-label-caps text-on-surface-variant border-b border-outline/20 pb-2 mb-4 flex items-center gap-2">
-<span className="material-symbols-outlined text-[16px]">link</span>
-           BLOCKCHAIN RECORD
-        </h3>
-<div className="flex flex-col gap-4">
-<div>
-<div className="font-label-caps text-label-caps text-on-surface-variant mb-1">LOCK TRANSACTION</div>
-<div className="font-code-sm text-code-sm text-on-surface bg-[#0a0b0b] p-2 truncate border border-outline/10 cursor-pointer hover:border-primary-fixed transition-colors" onClick={() => navigator.clipboard.writeText('0x7f8b9a0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e3a9c')} title="0x7f8b...3a9c">
-              0x7f8b9a0c...e3a9c
-            </div>
-</div>
-<div>
-<div className="font-label-caps text-label-caps text-on-surface-variant mb-1">RESOLVE TRANSACTION</div>
-<div className="font-code-sm text-code-sm text-on-surface bg-[#0a0b0b] p-2 truncate border border-outline/10 cursor-pointer hover:border-primary-fixed transition-colors" onClick={() => navigator.clipboard.writeText('0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f9f8e')} title="0x1a2b...9f8e">
-              0x1a2b3c4d...f9f8e
-            </div>
-</div>
-</div>
-</div>
 {/* Execution Timeline */}
 <div className="flex flex-col">
 <h3 className="font-label-caps text-label-caps text-on-surface-variant border-b border-outline/20 pb-2 mb-6 flex items-center gap-2">
@@ -224,7 +203,7 @@ export default function ClaimResolved({ claim }: { claim: any }) {
 <div className="relative">
 <div className="absolute -left-6 top-1 w-3 h-3 rounded-full bg-surface-container border-2 border-outline z-10"></div>
 <div className="font-label-caps text-label-caps text-on-surface">CLAIM LOCKED</div>
-<div className="font-code-sm text-code-sm text-on-surface-variant mt-1">Block 1492019 • 2024-10-24 14:32 UTC</div>
+<div className="font-code-sm text-code-sm text-on-surface-variant mt-1">Escrow deposit locked in Intelligent Contract.</div>
 </div>
 {/* Step 2 */}
 <div className="relative">

@@ -331,6 +331,90 @@ def test_resolve_strict_consensus_spdx_and_excerpts(direct_vm, direct_deploy, di
     assert any(f["path"] == "LICENSE" and "Apache-2.0" in f["excerpt"] for f in result["files"])
     assert any(f["path"] == "README.md" and "Apache-2.0" in f["excerpt"] for f in result["files"])
 
+def test_validator_rejects_hallucinated_payload(direct_vm, direct_deploy, direct_alice, direct_bob):
+    """
+    Verify that validator_fn explicitly rejects malicious leader payloads:
+    1. Hallucinated evidence excerpts (substring not in fetched text) -> validator returns False
+    2. Forged SPDX declarations (claiming MIT when repository is Apache-2.0) -> validator returns False
+    3. Conflicting outcome claims -> validator returns False
+    4. Genuine payload -> validator returns True
+    """
+    import sys
+    
+    contract = direct_deploy("contracts/licenselock.py")
+    direct_vm.sender = direct_alice
+    direct_vm.value = 100
+    
+    claim_id = contract.create_claim("attacker/repo", "sha-evil", direct_bob, "SPDX_MATCH", [])
+    
+    # Real repository files contain Apache-2.0
+    mock_github_file(direct_vm, "attacker/repo", "sha-evil", "LICENSE", 200, "SPDX-License-Identifier: APACHE-2.0\nApache License 2.0")
+    mock_github_file(direct_vm, "attacker/repo", "sha-evil", "README.md", 200, "Project\nSPDX-License-Identifier: APACHE-2.0")
+    
+    direct_vm.sender = direct_bob
+    contract.resolve(claim_id)
+    
+    assert len(direct_vm._captured_validators) > 0
+    result, leader_fn, val_fn = direct_vm._captured_validators[-1]
+    
+    gl_vm = sys.modules['genlayer.gl.vm']
+
+    
+    # 1. Hallucinated excerpt test:
+    hallucinated_excerpt_payload = {
+        "outcome": "PASS",
+        "reason": "Both files declare Apache-2.0",
+        "readme_path": "README.md",
+        "license_path": "LICENSE",
+        "readme_excerpt": "SPDX-License-Identifier: APACHE-2.0",
+        "license_excerpt": "FABRICATED_SUBSTRING_DOES_NOT_EXIST",
+        "readme_spdx": "APACHE-2.0",
+        "license_spdx": "APACHE-2.0"
+    }
+    assert val_fn(gl_vm.Return(hallucinated_excerpt_payload)) is False
+    
+    # 2. Forged SPDX test:
+    forged_spdx_payload = {
+        "outcome": "PASS",
+        "reason": "Both files declare Apache-2.0",
+        "readme_path": "README.md",
+        "license_path": "LICENSE",
+        "readme_excerpt": "SPDX-License-Identifier: APACHE-2.0",
+        "license_excerpt": "SPDX-License-Identifier: APACHE-2.0",
+        "readme_spdx": "APACHE-2.0",
+        "license_spdx": "MIT"  # Forged!
+    }
+    assert val_fn(gl_vm.Return(forged_spdx_payload)) is False
+    
+    # 3. Forged outcome test:
+    forged_outcome_payload = {
+        "outcome": "FAIL",  # Contradicts real PASS
+        "reason": "Fake fail",
+        "readme_path": "README.md",
+        "license_path": "LICENSE",
+        "readme_excerpt": "SPDX-License-Identifier: APACHE-2.0",
+        "license_excerpt": "SPDX-License-Identifier: APACHE-2.0",
+        "readme_spdx": "APACHE-2.0",
+        "license_spdx": "APACHE-2.0"
+    }
+    assert val_fn(gl_vm.Return(forged_outcome_payload)) is False
+    
+    # 4. Genuine payload test:
+    genuine_payload = {
+        "outcome": "PASS",
+        "reason": "Both README.md and LICENSE explicitly declare the APACHE-2.0 license.",
+        "readme_path": "README.md",
+        "license_path": "LICENSE",
+        "readme_excerpt": "SPDX-License-Identifier: APACHE-2.0",
+        "license_excerpt": "SPDX-License-Identifier: APACHE-2.0",
+        "readme_spdx": "APACHE-2.0",
+        "license_spdx": "APACHE-2.0"
+    }
+    assert val_fn(gl_vm.Return(genuine_payload)) is True
+
+
+
+
 
 
 

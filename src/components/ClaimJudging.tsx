@@ -54,16 +54,9 @@ export default function ClaimJudging() {
 <div className="bg-[#111111] p-6 flex flex-col gap-2 md:col-span-2 hover:bg-[#1A1A1A] transition-colors">
 <span className="font-label-caps text-label-caps text-on-surface-variant uppercase">Commit Hash Target</span>
 <div className="flex items-center justify-between w-full">
-<span className="font-code-sm text-code-sm text-primary-fixed bg-primary-fixed/10 px-2 py-1 border border-primary-fixed/20 truncate max-w-[80%]">a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0</span>
+<span className="font-code-sm text-code-sm text-primary-fixed bg-primary-fixed/10 px-2 py-1 border border-primary-fixed/20 truncate max-w-[80%]">Target commit SHA</span>
 <span className="material-symbols-outlined text-on-surface-variant text-[16px]">file_copy</span>
 </div>
-</div>
-<div className="bg-[#111111] p-6 flex flex-col gap-2 md:col-span-2 hover:bg-[#1A1A1A] transition-colors">
-<span className="font-label-caps text-label-caps text-on-surface-variant uppercase flex items-center gap-2">
-<span className="material-symbols-outlined text-[14px]">pending</span>
-                            Pending Resolve Tx
-                        </span>
-<span className="font-code-sm text-code-sm text-on-surface break-all opacity-80">0x8fB3c9E2d7A1b5F4e8D0c2A9b7F3e1D6a4B8c2E9f0A3b1C5d7E2F8a4B6c9D1E</span>
 </div>
 </div>
 </div>
@@ -94,12 +87,11 @@ export default function ClaimJudging() {
         const terminalLines = document.getElementById("terminal-lines");
         const messages = [
             "Fetching artifact...",
-            "Decrypting payload...",
-            "Analyzing AST...",
-            "Checking dependency tree...",
-            "Verifying cross-chain signatures...",
+            "fetching files...",
+            "Checking license declarations...",
             "Awaiting consensus..."
         ];
+
         
         let messageIndex = 0;
         

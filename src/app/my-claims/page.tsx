@@ -196,7 +196,7 @@ export default function MyClaims() {
                   My Claims
                 </h1>
                 <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
-                  Monitor and manage your cryptographic license verifications.
+                  Monitor and manage your on-chain license verifications.
                   Verbatim evidence locked on GenLayer.
                 </p>
               </div>

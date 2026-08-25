@@ -1,6 +1,7 @@
 # 🛡️ LicenseLock
 
-**Institutional-Grade Open-Source License Escrow on GenLayer.** Lock GEN tokens against a GitHub commit, trigger decentralized validators to perform mechanical license verification, and settle payouts or refunds based purely on cryptographic consensus.
+**Institutional-Grade Open-Source License Escrow on GenLayer.** Lock GEN tokens against a GitHub commit, trigger decentralized validators to perform mechanical license verification, and settle payouts or refunds based purely on on-chain verification.
+
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000.svg)](https://nextjs.org)
 [![GenLayer](https://img.shields.io/badge/GenLayer-Studio-c7f300.svg)](https://www.genlayer.com)
@@ -111,7 +112,8 @@ stateDiagram-v2
 | **Chain** | GenLayer Intelligent Contract (Python), StudioNet |
 | **Wallet** | genlayer-js + viem + MetaMask |
 | **Consensus** | GenVM Nondeterministic Web Fetches & Multi-Validator Consensus |
-| **Tests** | pytest + gltest (17/17 Direct Integration Tests passing) |
+| **Tests** | pytest + gltest (18/18 Direct Integration Tests passing) |
+
 
 
 ---
