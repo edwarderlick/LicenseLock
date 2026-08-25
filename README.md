@@ -7,7 +7,8 @@
 
 **Live production dApp:** [licenselock.vercel.app](https://licenselock.vercel.app)
 
-Live StudioNet Contract: `0x01a080550BA2C452027962c637635B415C68e9b7`
+Live StudioNet Contract: `0xE8BFC0D903fE2b9F5E1f0895A9d8FdF77888c192`
+
 
 LicenseLock is an autonomous protocol bridging decentralized escrow with real-world open-source compliance. Validators fetch target repository files at a specific commit, perform strict mechanical string comparisons against declared licenses, and route native GenLayer value based on the verified outcome.
 
@@ -110,7 +111,8 @@ stateDiagram-v2
 | **Chain** | GenLayer Intelligent Contract (Python), StudioNet |
 | **Wallet** | genlayer-js + viem + MetaMask |
 | **Consensus** | GenVM Nondeterministic Web Fetches & Multi-Validator Consensus |
-| **Tests** | pytest + gltest (16/16 Direct Integration Tests passing) |
+| **Tests** | pytest + gltest (17/17 Direct Integration Tests passing) |
+
 
 ---
 

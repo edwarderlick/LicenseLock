@@ -309,6 +309,29 @@ def test_resolve_no_copyleft_no_false_positive_on_ordinary_words(direct_vm, dire
     result = claim["result_json"] if isinstance(claim["result_json"], dict) else json.loads(claim["result_json"])
     assert "No declared copyleft" in result["reason"]
 
+def test_resolve_strict_consensus_spdx_and_excerpts(direct_vm, direct_deploy, direct_alice, direct_bob):
+    """Ensure validator verifies genuine evidence excerpts and exact SPDX matching."""
+    contract = direct_deploy("contracts/licenselock.py")
+    direct_vm.sender = direct_alice
+    direct_vm.value = 500
+    
+    claim_id = contract.create_claim("org/strict-repo", "sha-strict", direct_bob, "SPDX_MATCH", [])
+    
+    mock_github_file(direct_vm, "org/strict-repo", "sha-strict", "LICENSE", 200, "SPDX-License-Identifier: Apache-2.0\nApache License Version 2.0")
+    mock_github_file(direct_vm, "org/strict-repo", "sha-strict", "README.md", 200, "Project\nSPDX-License-Identifier: Apache-2.0")
+    
+    direct_vm.sender = direct_bob
+    contract.resolve(claim_id)
+    
+    claim = contract.get_claim(claim_id)
+    assert claim["state"] == "RESOLVED"
+    assert claim["outcome"] == "PASS"
+    result = claim["result_json"] if isinstance(claim["result_json"], dict) else json.loads(claim["result_json"])
+    assert result["outcome"] == "PASS"
+    assert any(f["path"] == "LICENSE" and "Apache-2.0" in f["excerpt"] for f in result["files"])
+    assert any(f["path"] == "README.md" and "Apache-2.0" in f["excerpt"] for f in result["files"])
+
+
 
 
 

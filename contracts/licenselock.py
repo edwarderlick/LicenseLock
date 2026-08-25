@@ -197,158 +197,160 @@ class LicenseLock(gl.Contract):
         target_allowed_licenses_raw = claim.allowed_licenses_json
         target_dir = getattr(claim, "target_directory", "").strip("/")
 
-        def leader_fn() -> dict:
-            def fetch_file(repo: str, commit: str, path: str) -> dict:
-                url = f"https://raw.githubusercontent.com/{repo}/{commit}/{path}"
-                max_retries = 3
-                backoff = 0.5
+        def fetch_file(repo: str, commit: str, path: str) -> dict:
+            url = f"https://raw.githubusercontent.com/{repo}/{commit}/{path}"
+            max_retries = 3
+            backoff = 0.5
+            
+            for attempt in range(max_retries):
+                try:
+                    res = gl.nondet.web.get(url)
+                except Exception:
+                    if attempt < max_retries - 1:
+                        time.sleep(backoff)
+                        backoff *= 1.5
+                        continue
+                    return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
+
+                if res.status == 404:
+                    return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
                 
-                for attempt in range(max_retries):
-                    try:
-                        res = gl.nondet.web.get(url)
-                    except Exception:
-                        if attempt < max_retries - 1:
-                            time.sleep(backoff)
-                            backoff *= 1.5
-                            continue
-                        return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
+                if res.status == 429:
+                    if attempt < max_retries - 1:
+                        time.sleep(backoff)
+                        backoff *= 2.0
+                        continue
+                    return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
 
-                    if res.status == 404:
-                        return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
-                    
-                    if res.status == 429:
-                        if attempt < max_retries - 1:
-                            time.sleep(backoff)
-                            backoff *= 2.0
-                            continue
-                        return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
+                if res.status >= 500:
+                    if attempt < max_retries - 1:
+                        time.sleep(backoff)
+                        backoff *= 1.5
+                        continue
+                    raise gl.vm.UserError(f"{ERROR_TRANSIENT} HTTP error {res.status} on {url}")
 
-                    if res.status >= 500:
-                        if attempt < max_retries - 1:
-                            time.sleep(backoff)
-                            backoff *= 1.5
-                            continue
-                        raise gl.vm.UserError(f"{ERROR_TRANSIENT} HTTP error {res.status} on {url}")
+                if res.status != 200:
+                    return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
+                
+                try:
+                    body = res.body.decode("utf-8")
+                except Exception:
+                    body = str(res.body)
 
-                    if res.status != 200:
-                        return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
-                    
-                    try:
-                        body = res.body.decode("utf-8")
-                    except Exception:
-                        body = str(res.body)
+                if not body:
+                    return {"status": "EMPTY", "path": path, "excerpt": "", "spdx": None, "raw": body}
+                
+                # Regex search for standard SPDX-License-Identifier
+                match = re.search(r"SPDX-License-Identifier:\s*([A-Za-z0-9\.\-\+]+)", body, re.IGNORECASE)
+                if match:
+                    spdx = match.group(1).upper()
+                    excerpt = match.group(0)
+                    return {"status": "FOUND", "path": path, "excerpt": excerpt, "spdx": spdx, "raw": body}
+                
+                # Fallbacks for standard permissive licenses
+                lower_body = body.lower()
+                if "mit license" in lower_body:
+                    return {"status": "FOUND", "path": path, "excerpt": "MIT License", "spdx": "MIT", "raw": body}
+                if "apache license" in lower_body and "version 2.0" in lower_body:
+                    return {"status": "FOUND", "path": path, "excerpt": "Apache License Version 2.0", "spdx": "APACHE-2.0", "raw": body}
+                
+                return {"status": "NO_SPDX", "path": path, "excerpt": "", "spdx": None, "raw": body}
 
-                    if not body:
-                        return {"status": "EMPTY", "path": path, "excerpt": "", "spdx": None, "raw": body}
-                    
-                    # Regex search for standard SPDX-License-Identifier
-                    match = re.search(r"SPDX-License-Identifier:\s*([A-Za-z0-9\.\-\+]+)", body, re.IGNORECASE)
-                    if match:
-                        spdx = match.group(1).upper()
-                        excerpt = match.group(0)
-                        return {"status": "FOUND", "path": path, "excerpt": excerpt, "spdx": spdx, "raw": body}
-                    
-                    # Fallbacks for standard permissive licenses
-                    lower_body = body.lower()
-                    if "mit license" in lower_body:
-                        return {"status": "FOUND", "path": path, "excerpt": "MIT License", "spdx": "MIT", "raw": body}
-                    if "apache license" in lower_body and "version 2.0" in lower_body:
-                        return {"status": "FOUND", "path": path, "excerpt": "Apache License Version 2.0", "spdx": "APACHE-2.0", "raw": body}
-                    
-                    return {"status": "NO_SPDX", "path": path, "excerpt": "", "spdx": None, "raw": body}
+            return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
 
-                return {"status": "MISSING", "path": path, "excerpt": "", "spdx": None, "raw": ""}
-
-            def fetch_first_valid(repo: str, commit: str, candidate_paths: list[str]) -> dict:
-                evaluated_candidates = []
-                if target_dir:
-                    for c in candidate_paths:
-                        scoped = f"{target_dir}/{c}".strip("/")
-                        if scoped not in evaluated_candidates:
-                            evaluated_candidates.append(scoped)
+        def fetch_first_valid(repo: str, commit: str, candidate_paths: list[str]) -> dict:
+            evaluated_candidates = []
+            if target_dir:
                 for c in candidate_paths:
-                    if c not in evaluated_candidates:
-                        evaluated_candidates.append(c)
+                    scoped = f"{target_dir}/{c}".strip("/")
+                    if scoped not in evaluated_candidates:
+                        evaluated_candidates.append(scoped)
+            for c in candidate_paths:
+                if c not in evaluated_candidates:
+                    evaluated_candidates.append(c)
 
-                for candidate in evaluated_candidates:
-                    res = fetch_file(repo, commit, candidate)
-                    if res["status"] in ("FOUND", "NO_SPDX", "EMPTY"):
-                        return res
-                default_path = evaluated_candidates[0] if evaluated_candidates else ""
-                return {"status": "MISSING", "path": default_path, "excerpt": "", "spdx": None, "raw": ""}
+            for candidate in evaluated_candidates:
+                res = fetch_file(repo, commit, candidate)
+                if res["status"] in ("FOUND", "NO_SPDX", "EMPTY"):
+                    return res
+            default_path = evaluated_candidates[0] if evaluated_candidates else ""
+            return {"status": "MISSING", "path": default_path, "excerpt": "", "spdx": None, "raw": ""}
 
-            def is_copyleft_identifier(spdx_or_name: str) -> bool:
-                if not spdx_or_name:
-                    return False
-                s = spdx_or_name.strip().upper()
-                copyleft_prefixes = ("GPL", "AGPL", "LGPL", "MPL", "EUPL", "SSPL", "OSL")
-                for prefix in copyleft_prefixes:
-                    if s == prefix or s.startswith(prefix + "-") or s.startswith(prefix + "_") or s.startswith(prefix + "V"):
-                        return True
+        def is_copyleft_identifier(spdx_or_name: str) -> bool:
+            if not spdx_or_name:
                 return False
+            s = spdx_or_name.strip().upper()
+            copyleft_prefixes = ("GPL", "AGPL", "LGPL", "MPL", "EUPL", "SSPL", "OSL")
+            for prefix in copyleft_prefixes:
+                if s == prefix or s.startswith(prefix + "-") or s.startswith(prefix + "_") or s.startswith(prefix + "V"):
+                    return True
+            return False
 
-            def check_declared_license_copyleft(text: str) -> tuple[bool, str]:
-                """
-                Check explicit license declaration headers in root LICENSE files.
-                Requires structured headers (SPDX or formal license title),
-                preventing false positives on ordinary words like 'application' or 'template'.
-                """
-                if not text:
-                    return False, ""
-                
-                # Check for explicit SPDX-License-Identifier
-                spdx_match = re.search(r"SPDX-License-Identifier:\s*([A-Za-z0-9\.\-\+]+)", text, re.IGNORECASE)
-                if spdx_match:
-                    found_spdx = spdx_match.group(1).upper()
-                    if is_copyleft_identifier(found_spdx):
-                        return True, spdx_match.group(0)
-                
-                # Check for formal GNU / Mozilla license titles at the top of the file
-                gnu_match = re.search(r"GNU\s+(?:AFFERO\s+|LESSER\s+|LIBRARY\s+)?GENERAL\s+PUBLIC\s+LICENSE", text, re.IGNORECASE)
-                if gnu_match:
-                    return True, gnu_match.group(0)
-                
-                mpl_match = re.search(r"MOZILLA\s+PUBLIC\s+LICENSE", text, re.IGNORECASE)
-                if mpl_match:
-                    return True, mpl_match.group(0)
-
+        def check_declared_license_copyleft(text: str) -> tuple[bool, str]:
+            """
+            Check explicit license declaration headers in root LICENSE files.
+            Requires structured headers (SPDX or formal license title),
+            preventing false positives on ordinary words like 'application' or 'template'.
+            """
+            if not text:
                 return False, ""
+            
+            # Check for explicit SPDX-License-Identifier
+            spdx_match = re.search(r"SPDX-License-Identifier:\s*([A-Za-z0-9\.\-\+]+)", text, re.IGNORECASE)
+            if spdx_match:
+                found_spdx = spdx_match.group(1).upper()
+                if is_copyleft_identifier(found_spdx):
+                    return True, spdx_match.group(0)
+            
+            # Check for formal GNU / Mozilla license titles at the top of the file
+            gnu_match = re.search(r"GNU\s+(?:AFFERO\s+|LESSER\s+|LIBRARY\s+)?GENERAL\s+PUBLIC\s+LICENSE", text, re.IGNORECASE)
+            if gnu_match:
+                return True, gnu_match.group(0)
+            
+            mpl_match = re.search(r"MOZILLA\s+PUBLIC\s+LICENSE", text, re.IGNORECASE)
+            if mpl_match:
+                return True, mpl_match.group(0)
 
-            def parse_manifest_declared_license(manifest_path: str, raw_text: str) -> str:
-                """
-                Parse ONLY the declared 'license' key from root manifest files.
-                Never scans lockfiles or unparsed text bodies.
-                """
-                if not raw_text:
-                    return ""
-                if manifest_path.endswith("package.json"):
-                    try:
-                        data = json.loads(raw_text)
-                        lic = data.get("license", "")
-                        if isinstance(lic, str):
-                            return lic.strip()
-                        elif isinstance(lic, dict):
-                            return str(lic.get("type", "")).strip()
-                    except Exception:
-                        pass
-                elif manifest_path.endswith("Cargo.toml") or manifest_path.endswith("pyproject.toml"):
-                    match = re.search(r'^\s*license\s*=\s*["\']([^"\']+)["\']', raw_text, re.MULTILINE | re.IGNORECASE)
-                    if match:
-                        return match.group(1).strip()
+            return False, ""
+
+        def parse_manifest_declared_license(manifest_path: str, raw_text: str) -> str:
+            """
+            Parse ONLY the declared 'license' key from root manifest files.
+            Never scans lockfiles or unparsed text bodies.
+            """
+            if not raw_text:
                 return ""
+            if manifest_path.endswith("package.json"):
+                try:
+                    data = json.loads(raw_text)
+                    lic = data.get("license", "")
+                    if isinstance(lic, str):
+                        return lic.strip()
+                    elif isinstance(lic, dict):
+                        return str(lic.get("type", "")).strip()
+                except Exception:
+                    pass
+            elif manifest_path.endswith("Cargo.toml") or manifest_path.endswith("pyproject.toml"):
+                match = re.search(r'^\s*license\s*=\s*["\']([^"\']+)["\']', raw_text, re.MULTILINE | re.IGNORECASE)
+                if match:
+                    return match.group(1).strip()
+            return ""
 
-            LICENSE_CANDIDATES = [
-                "LICENSE", "license.md", "LICENSE.md", "LICENSE.txt", "license",
-                "COPYING", "LICENSE.rst", "LICENSE-MIT", "LICENSE-APACHE"
-            ]
-            README_CANDIDATES = [
-                "README.md", "readme.md", "README.rst", "README.txt", "README"
-            ]
-            # Strict root manifests (No lockfiles like package-lock.json)
-            MANIFEST_CANDIDATES = [
-                "package.json", "Cargo.toml", "pyproject.toml"
-            ]
+        LICENSE_CANDIDATES = [
+            "LICENSE", "license.md", "LICENSE.md", "LICENSE.txt", "license",
+            "COPYING", "LICENSE.rst", "LICENSE-MIT", "LICENSE-APACHE"
+        ]
+        README_CANDIDATES = [
+            "README.md", "readme.md", "README.rst", "README.txt", "README"
+        ]
+        MANIFEST_CANDIDATES = [
+            "package.json", "Cargo.toml", "pyproject.toml"
+        ]
 
+        def evaluate_repository(include_raw: bool = False) -> dict:
+            """
+            Executes independent file fetching and rule evaluation.
+            """
             if target_claim_type == "SPDX_MATCH":
                 readme_res = fetch_first_valid(target_repo, target_commit, README_CANDIDATES)
                 license_res = fetch_first_valid(target_repo, target_commit, LICENSE_CANDIDATES)
@@ -368,7 +370,7 @@ class LicenseLock(gl.Contract):
                     outcome = "FAIL"
                     reason = f"License mismatch: {readme_res['path']} declares {readme_res['spdx']}, but {license_res['path']} declares {license_res['spdx']}."
                     
-                return {
+                res = {
                     "outcome": outcome,
                     "reason": reason,
                     "readme_path": readme_res["path"],
@@ -378,6 +380,11 @@ class LicenseLock(gl.Contract):
                     "readme_spdx": readme_res["spdx"],
                     "license_spdx": license_res["spdx"],
                 }
+                if include_raw:
+                    res["readme_raw"] = readme_res.get("raw", "")
+                    res["license_raw"] = license_res.get("raw", "")
+                return res
+
             elif target_claim_type == "ALLOWED_LICENSE_SET":
                 license_res = fetch_first_valid(target_repo, target_commit, LICENSE_CANDIDATES)
                 allowed_list = []
@@ -397,13 +404,17 @@ class LicenseLock(gl.Contract):
                     outcome = "FAIL"
                     reason = f"Policy violation: Found {license_res['spdx']} in {license_res['path']}, but it is not in the allowed licenses list: {allowed_list}."
                     
-                return {
+                res = {
                     "outcome": outcome,
                     "reason": reason,
                     "license_path": license_res["path"],
                     "license_excerpt": str(license_res["excerpt"]),
                     "license_spdx": license_res["spdx"],
                 }
+                if include_raw:
+                    res["license_raw"] = license_res.get("raw", "")
+                return res
+
             elif target_claim_type == "NO_COPYLEFT":
                 license_res = fetch_first_valid(target_repo, target_commit, LICENSE_CANDIDATES)
                 manifest_res = fetch_first_valid(target_repo, target_commit, MANIFEST_CANDIDATES)
@@ -435,7 +446,7 @@ class LicenseLock(gl.Contract):
                     if manifest_declared_license:
                         manifest_excerpt = f'"license": "{manifest_declared_license}"'
 
-                return {
+                res = {
                     "outcome": outcome,
                     "reason": reason,
                     "license_path": license_res["path"],
@@ -443,10 +454,25 @@ class LicenseLock(gl.Contract):
                     "manifest_excerpt": manifest_excerpt,
                     "manifest_path": manifest_path
                 }
+                if include_raw:
+                    res["license_raw"] = license_res.get("raw", "")
+                    res["manifest_raw"] = manifest_res.get("raw", "")
+                return res
+
             else:
                 return {"outcome": "INSUFFICIENT", "reason": "Insufficient evidence: Unknown claim type or missing repository data."}
 
+        def leader_fn() -> dict:
+            return evaluate_repository(include_raw=False)
+
         def validator_fn(leaders_res: gl.vm.Result) -> bool:
+            """
+            Strict Consensus Validation:
+            1. Executes independent web fetches.
+            2. Re-derives verdict locally.
+            3. Verifies leader's reported SPDX identifiers match validator's parsed SPDX identifiers.
+            4. Validates that leader's excerpts exist as exact substrings within the validator's fetched texts.
+            """
             if not isinstance(leaders_res, gl.vm.Return):
                 try:
                     leader_fn()
@@ -463,13 +489,56 @@ class LicenseLock(gl.Contract):
                     return False
                 
             leader_data = leaders_res.calldata
-            leader_outcome = leader_data.get("outcome")
-            
-            validator_result = leader_fn()
-            
-            if validator_result.get("outcome") != leader_outcome:
+            if not isinstance(leader_data, dict):
                 return False
-                
+
+            # Validator executes its own independent web fetch and evaluation
+            val_data = evaluate_repository(include_raw=True)
+            
+            # 1. Independent Re-derivation: Assert identical outcome verdict
+            if val_data.get("outcome") != leader_data.get("outcome"):
+                return False
+
+            # 2. Path consistency verification
+            if leader_data.get("license_path") != val_data.get("license_path"):
+                return False
+            if target_claim_type == "SPDX_MATCH":
+                if leader_data.get("readme_path") != val_data.get("readme_path"):
+                    return False
+
+            # 3. SPDX Identifier verification
+            if target_claim_type == "SPDX_MATCH":
+                if leader_data.get("readme_spdx") != val_data.get("readme_spdx"):
+                    return False
+                if leader_data.get("license_spdx") != val_data.get("license_spdx"):
+                    return False
+            elif target_claim_type == "ALLOWED_LICENSE_SET":
+                if leader_data.get("license_spdx") != val_data.get("license_spdx"):
+                    return False
+            elif target_claim_type == "NO_COPYLEFT":
+                if leader_data.get("manifest_path") != val_data.get("manifest_path"):
+                    return False
+
+            # 4. Excerpt Substring Verification (Anti-Hallucination)
+            # The leader's evidence excerpts MUST exist as genuine substrings in the validator's fetched text
+            leader_lic_excerpt = str(leader_data.get("license_excerpt", "")).strip()
+            if leader_lic_excerpt:
+                val_lic_raw = str(val_data.get("license_raw", ""))
+                if leader_lic_excerpt not in val_lic_raw:
+                    return False  # Hallucinated license excerpt rejected
+
+            leader_readme_excerpt = str(leader_data.get("readme_excerpt", "")).strip()
+            if leader_readme_excerpt:
+                val_readme_raw = str(val_data.get("readme_raw", ""))
+                if leader_readme_excerpt not in val_readme_raw:
+                    return False  # Hallucinated readme excerpt rejected
+
+            leader_manifest_excerpt = str(leader_data.get("manifest_excerpt", "")).strip()
+            if leader_manifest_excerpt:
+                val_manifest_raw = str(val_data.get("manifest_raw", ""))
+                if leader_manifest_excerpt not in val_manifest_raw:
+                    return False  # Hallucinated manifest excerpt rejected
+
             return True
 
         result_data = gl.vm.run_nondet_unsafe(leader_fn, validator_fn)
