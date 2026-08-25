@@ -284,8 +284,8 @@ export default function MyClaims() {
                     <option value="SPDX_MATCH">Type: SPDX Match</option>
                     <option value="NO_COPYLEFT">Type: No Copyleft</option>
                     <option value="ALLOWED_LICENSE_SET">Type: Allowed Licenses</option>
-                    <option value="SEMANTIC_AUDIT">Type: Semantic AI Audit</option>
                   </select>
+
 
 
                   {activeFilterCount > 0 && (

@@ -16,8 +16,8 @@ const TYPE_OPTIONS = [
   { value: "SPDX_MATCH", label: "Type: SPDX Match" },
   { value: "NO_COPYLEFT", label: "Type: No Copyleft" },
   { value: "ALLOWED_LICENSE_SET", label: "Type: Allowed Licenses" },
-  { value: "SEMANTIC_AUDIT", label: "Type: Semantic AI Audit" },
 ];
+
 
 
 export default function BrowseClaims() {

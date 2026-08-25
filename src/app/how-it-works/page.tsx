@@ -29,7 +29,7 @@ export default function HowItWorks() {
         How Verification <br/><span className="text-on-surface-variant">Operates</span>
 </h1>
 <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mt-4 border-l border-primary-fixed pl-6">
-        LicenseLock utilizes deterministic validation protocols to analyze repository metadata and file contents. It translates subjective legal claims into objective, machine-verifiable truths.
+        LicenseLock uses GenLayer decentralized validators to fetch root LICENSE and manifest files at a specified commit, performing mechanical string comparisons to resolve open-source license claims into deterministic payout outcomes.
       </p>
 </div>
 {/* Prominent Callout */}
@@ -100,7 +100,7 @@ export default function HowItWorks() {
 <div className="font-label-caps text-label-caps text-on-surface-variant mb-2">CLAIM TYPE 02</div>
 <h3 className="font-headline-sm text-headline-sm text-on-background">No Copyleft Found</h3>
 <p className="font-body-md text-body-md text-on-surface-variant mt-4">
-                        Scans the repository to ensure no restrictive copyleft licenses (like GPL, AGPL) are present in any detected license files or headers.
+                        Scans root LICENSE and manifests (package.json, pyproject.toml, Cargo.toml) to ensure no viral copyleft licenses (like GPL, AGPL) are present.
                     </p>
 </div>
 <div className="p-6 flex flex-col gap-6 flex-1">
@@ -123,9 +123,9 @@ export default function HowItWorks() {
 <span className="font-label-caps text-label-caps text-on-surface">FAIL CONDITION</span>
 </div>
 <div className="bg-surface-container border border-outline/20 p-4 font-code-sm text-code-sm text-on-surface-variant break-all">
-<div className="text-error mb-2">// Copyleft license detected in subdirectory</div>
-<span>src/vendor/lib-x/LICENSE</span><br/>
-<span>SPDX-License-Identifier: GPL-3.0</span>
+<div className="text-error mb-2">// Copyleft license detected in manifest</div>
+<span>package.json: "license": "GPL-3.0"</span><br/>
+<span>Detected: GPL-3.0</span>
 </div>
 </div>
 </div>
@@ -150,7 +150,7 @@ export default function HowItWorks() {
 <div className="bg-surface-container border border-outline/20 p-4 font-code-sm text-code-sm text-on-surface-variant break-all">
 <div className="text-primary-fixed mb-2">Allowlist: [MIT, Apache-2.0]</div>
 <span>Detected: MIT (root)</span><br/>
-<span>Detected: Apache-2.0 (lib/)</span>
+<span>Detected: Apache-2.0 (manifest)</span>
 </div>
 </div>
 {/* Fail Case */}
@@ -162,7 +162,7 @@ export default function HowItWorks() {
 <div className="bg-surface-container border border-outline/20 p-4 font-code-sm text-code-sm text-on-surface-variant break-all">
 <div className="text-error mb-2">Allowlist: [MIT, Apache-2.0]</div>
 <span>Detected: MIT (root)</span><br/>
-<span><span className="text-error font-bold">Detected: BSD-2-Clause (utils/)</span></span>
+<span><span className="text-error font-bold">Detected: BSD-2-Clause (manifest)</span></span>
 </div>
 </div>
 </div>
@@ -187,12 +187,12 @@ export default function HowItWorks() {
 <h4 className="font-headline-sm text-headline-sm text-on-background uppercase tracking-tight">Pending</h4>
 </div>
 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                    A claim is submitted to the network. It awaits pickup by verification nodes. During this phase, the claim parameters are locked into the ledger.
+                    A claim is submitted to the smart contract, locking the escrow against a target repository and commit. State is OPEN.
                 </p>
 {/* Terminal decorative */}
 <div className="mt-8 bg-background border border-outline/20 p-3 font-code-sm text-code-sm text-on-surface-variant opacity-50 group-hover:opacity-100 transition-opacity">
-                    &gt; status: queued<br/>
-                    &gt; nodes_assigned: 0
+                    &gt; state: OPEN<br/>
+                    &gt; escrow: locked
                 </div>
 </div>
 {/* Step 2 */}
@@ -200,16 +200,15 @@ export default function HowItWorks() {
 <div className="w-8 h-8 bg-surface border border-primary-fixed flex items-center justify-center font-code-sm text-code-sm text-primary-fixed mb-8">02</div>
 <div className="flex items-center gap-3 mb-4">
 <span className="w-3 h-3 bg-primary-fixed border border-primary-fixed rounded-sm animate-pulse"></span>
-<h4 className="font-headline-sm text-headline-sm text-on-background uppercase tracking-tight">Judging</h4>
+<h4 className="font-headline-sm text-headline-sm text-on-background uppercase tracking-tight">Resolving</h4>
 </div>
 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                    Nodes actively fetch the repository data, parse license files, and execute the logic defined by the claim type. Consensus is being formed.
+                    Validators fetch root LICENSE and manifest files at the exact commit and evaluate the policy assertion.
                 </p>
 {/* Terminal decorative */}
 <div className="mt-8 bg-background border border-outline/20 p-3 font-code-sm text-code-sm text-primary-fixed opacity-80 group-hover:opacity-100 transition-opacity">
-                    &gt; status: executing<br/>
-                    &gt; fetching_repo_tree...<br/>
-                    &gt; parsing_blob_spdx...
+                    &gt; fetching: LICENSE...<br/>
+                    &gt; evaluating_policy...
                 </div>
 </div>
 {/* Step 3 */}
@@ -217,16 +216,15 @@ export default function HowItWorks() {
 <div className="w-8 h-8 bg-surface border border-outline/50 flex items-center justify-center font-code-sm text-code-sm text-on-surface mb-8">03</div>
 <div className="flex items-center gap-3 mb-4">
 <span className="w-3 h-3 bg-inverse-primary border border-outline rounded-sm"></span>
-<h4 className="font-headline-sm text-headline-sm text-on-background uppercase tracking-tight">Resolved</h4>
+<h4 className="font-headline-sm text-headline-sm text-on-background uppercase tracking-tight">Settled</h4>
 </div>
 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                    Consensus is reached. The claim is permanently recorded as either True (Pass) or False (Fail), along with cryptographic proof of the execution.
+                    Consensus is recorded on-chain. On PASS, funds are routed to the recipient. On FAIL or INSUFFICIENT, 100% is refunded to the funder.
                 </p>
 {/* Terminal decorative */}
 <div className="mt-8 bg-background border border-outline/20 p-3 font-code-sm text-code-sm text-on-surface-variant opacity-50 group-hover:opacity-100 transition-opacity">
-                    &gt; consensus: reached<br/>
-                    &gt; block_hash: 0x8f4a...<br/>
-                    &gt; final_state: sealed
+                    &gt; outcome: RESOLVED<br/>
+                    &gt; escrow: routed
                 </div>
 </div>
 </div>
@@ -236,3 +234,4 @@ export default function HowItWorks() {
     </>
   );
 }
+

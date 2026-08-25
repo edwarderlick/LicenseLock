@@ -70,12 +70,9 @@ export default function CreateClaim() {
       return "Please specify at least one allowed SPDX license.";
     }
 
-    if (claimData.claimType === "SEMANTIC_AUDIT" && !claimData.custom_policy_prompt.trim()) {
-      return "Please specify the custom policy criteria prompt for the AI semantic audit.";
-    }
-
     return null;
   };
+
 
   const handleSubmit = async () => {
     if (!client || !account) {

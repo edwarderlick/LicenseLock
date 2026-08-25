@@ -19,7 +19,7 @@ export default function Home() {
             <div className="flex items-center gap-2 mb-12">
               <div className="h-2 w-2 bg-primary-fixed rounded-full animate-pulse"></div>
               <span className="font-label-caps text-label-caps text-primary-fixed tracking-widest uppercase">
-                System Operational // V 1.0.4
+                GenLayer StudioNet Connected
               </span>
             </div>
             <h1 className="font-display-lg text-display-lg text-on-surface max-w-4xl relative z-10 mb-8 leading-[0.9]">
@@ -27,8 +27,7 @@ export default function Home() {
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl relative z-10 mb-12">
               A neutral payout gate for open-source license claims. Lock GEN in
-              escrow against specific, checkable repo commits. Eliminate
-              subjective dispute overhead with objective, cryptographic execution.
+              escrow against specific, checkable repo commits. Decentralized validators fetch root LICENSE and manifest files to settle payouts automatically.
             </p>
             <div className="flex flex-wrap items-center gap-6 relative z-10">
               <Link
@@ -38,14 +37,6 @@ export default function Home() {
                 <span className="relative z-10">Enter App</span>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
               </Link>
-              <div className="flex flex-col gap-1">
-                <span className="font-label-caps text-label-caps text-on-surface-variant">
-                  Active Escrow
-                </span>
-                <span className="font-code-sm text-code-sm text-on-surface">
-                  GEN 4,092,100.00
-                </span>
-              </div>
             </div>
           </div>
           {/* Right Structural Image (4 Cols) */}
@@ -65,15 +56,15 @@ export default function Home() {
               <span
                 className="font-label-caps text-label-caps text-outline-variant [writing-mode:vertical-rl] transform rotate-180"
               >
-                Fig 1. Cryptographic Ledgering
+                Fig 1. Intelligent Contract Execution
               </span>
             </div>
-            <div className="relative z-10 bg-surface-container-lowest/80 backdrop-blur-md p-4 flex flex-col gap-2 shadow-xl">
+            <div className="relative z-10 bg-surface-container-lowest/80 backdrop-blur-md p-4 flex flex-col gap-2 shadow-xl border border-outline/20">
               <span className="font-label-caps text-label-caps text-on-surface-variant">
-                LATEST HASH BLOCK
+                GENVM CONSENSUS
               </span>
               <span className="font-code-sm text-code-sm text-primary-fixed truncate">
-                0x9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+                Fetches root LICENSE and manifests at specific commit
               </span>
             </div>
           </div>
@@ -81,15 +72,14 @@ export default function Home() {
         {/* Ticker Section */}
         <div className="bg-surface-container py-4 overflow-hidden relative">
           <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] gap-8 font-code-sm text-code-sm text-on-surface-variant">
-            <span>// VALIDATING SPDX DEFINITIONS</span>
-            <span>// COMPILING NO-COPYLEFT AST</span>
-            <span>// SYNCING WITH GENVM NODE</span>
+            <span>// FETCHING ROOT LICENSE AT COMMIT</span>
+            <span>// EVALUATING REPOSITORY MANIFESTS</span>
+            <span>// RESOLVING SPDX IDENTIFIERS</span>
             <span>// EXECUTING SMART ESCROWS</span>
-            <span>// VALIDATING SPDX DEFINITIONS</span>
-            <span>// COMPILING NO-COPYLEFT AST</span>
-            <span>// SYNCING WITH GENVM NODE</span>
+            <span>// FETCHING ROOT LICENSE AT COMMIT</span>
+            <span>// EVALUATING REPOSITORY MANIFESTS</span>
+            <span>// RESOLVING SPDX IDENTIFIERS</span>
             <span>// EXECUTING SMART ESCROWS</span>
-            <span>// VALIDATING SPDX DEFINITIONS</span>
           </div>
         </div>
         {/* 3 CLAIM TYPES SECTION */}
@@ -108,11 +98,11 @@ export default function Home() {
               SPDX Match
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-12 flex-1">
-              Mechanical verification of standard SPDX license identifiers within target repositories. Rejects non-compliant headers cryptographically.
+              Mechanical string verification of standard SPDX license identifiers between the root LICENSE file and README.
             </p>
             <div className="flex items-center justify-between">
               <span className="font-code-sm text-code-sm text-on-surface bg-surface-container-highest px-3 py-1 rounded-sm shadow-sm">
-                Strict Evaluation
+                Root File Matching
               </span>
               <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-2 group-hover:text-primary-fixed transition-all">
                 east
@@ -133,11 +123,11 @@ export default function Home() {
               No Copyleft
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-12 flex-1">
-              Scans codebase for aggressive copyleft clauses (e.g. GPLv3) ensuring upstream integration safety before escrow release.
+              Inspects root LICENSE and package manifests (package.json, pyproject.toml, Cargo.toml) to ensure no viral copyleft licenses (e.g. GPL, AGPL) exist.
             </p>
             <div className="flex items-center justify-between">
               <span className="font-code-sm text-code-sm text-on-surface bg-surface-container-highest px-3 py-1 rounded-sm shadow-sm">
-                AST Parsing
+                Manifest Checking
               </span>
               <span className="material-symbols-outlined text-on-surface-variant group-hover:translate-x-2 group-hover:text-primary-fixed transition-all">
                 east
@@ -158,7 +148,7 @@ export default function Home() {
               Allowed Set
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-12 flex-1">
-              Define an explicit whitelist of acceptable licenses. Only exact matches against this authorized parameter set will trigger payout.
+              Checks root LICENSE and package manifests against an explicit whitelist of acceptable SPDX identifiers provided by the funder.
             </p>
             <div className="flex items-center justify-between">
               <span className="font-code-sm text-code-sm text-on-surface bg-surface-container-highest px-3 py-1 rounded-sm shadow-sm">
@@ -171,6 +161,7 @@ export default function Home() {
           </div>
         </div>
         {/* Final CTA Footer Block */}
+
         <div className="bg-surface p-margin-mobile md:p-margin-desktop flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-surface-container flex items-center justify-center shadow-md">

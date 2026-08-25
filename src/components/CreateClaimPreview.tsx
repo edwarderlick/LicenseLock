@@ -50,7 +50,7 @@ export default function CreateClaimPreview({
         checkFile("LICENSE");
         checkFile("package.json");
         checkFile("Cargo.toml");
-      } else if (claimData.claimType === "ALLOWED_LICENSE_SET" || claimData.claimType === "SEMANTIC_AUDIT") {
+      } else if (claimData.claimType === "ALLOWED_LICENSE_SET") {
         setFileStatus({ "LICENSE": "checking" });
         checkFile("LICENSE");
       }
@@ -66,19 +66,8 @@ export default function CreateClaimPreview({
         </p>
       </div>
 
-      {claimData.claimType === "SEMANTIC_AUDIT" && claimData.custom_policy_prompt && (
-        <div className="bg-primary-fixed/5 border border-primary-fixed/30 p-6 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-primary-fixed">
-            <span className="material-symbols-outlined text-[18px]">psychology</span>
-            <span className="font-label-caps text-label-caps font-bold">AI SEMANTIC AUDIT PROMPT</span>
-          </div>
-          <p className="font-code-sm text-code-sm text-on-surface bg-surface-container p-3 border border-outline/20">
-            "{claimData.custom_policy_prompt}"
-          </p>
-        </div>
-      )}
-
       <div className="flex flex-col gap-4 bg-surface-container-low border border-outline/20 p-8">
+
         <div className="flex items-center justify-between border-b border-outline/20 pb-4 mb-4">
           <span className="font-label-caps text-label-caps text-on-surface-variant">FILE PATH</span>
           <span className="font-label-caps text-label-caps text-on-surface-variant">STATUS</span>
