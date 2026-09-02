@@ -37,7 +37,7 @@ Alpha Court highlighted the danger of custodying funds without guaranteed return
 Sybil Court was critiqued for unauthenticated interfaces and disjointed mechanics. LicenseLock normalizes all `msg.sender` addresses and enforces strict access control on cancellations. The UI promises no false mechanics; the `resolve` function actively executes `gl.get_contract_at().emit_transfer()` natively routing funds directly based on consensus state, completely bypassing vulnerable off-chain keeper dependencies.
 
 **3. Scoped, Accurate Parsing without Scope Creep (Provider Court Resolution)**
-To prevent false positives, `NO_COPYLEFT` strictly checks declared license headers in root `LICENSE` files and parses only the `"license"` field in package manifests (`package.json`, `pyproject.toml`, `Cargo.toml`). It never naively greps raw body texts (preventing false fails on words like "application") and ignores lockfiles.
+To prevent false positives, `NO_COPYLEFT` strictly checks declared license headers in scoped `LICENSE` files and parses only the `"license"` field in package manifests (`package.json`, `pyproject.toml`, `Cargo.toml`). It never naively greps raw body texts (preventing false fails on words like "application") and ignores lockfiles.
 
 **4. Fail-closed repository scope (this steward request)**
 create_claim requires an immutable 40-character hex SHA (no main/HEAD/short/all-zero).
@@ -54,7 +54,7 @@ NO_COPYLEFT inspects package.json, Cargo.toml, and pyproject.toml before payout.
 | Type | Question Shape |
 |---|---|
 | **SPDX Match** | Do the README and LICENSE files explicitly match declared SPDX identifiers? |
-| **No Copyleft** | Is the repository free of viral licenses (e.g., GPL, AGPL, MPL) in root LICENSE and manifest `license` fields? |
+| **No Copyleft** | Is the repository free of viral licenses (e.g., GPL, AGPL, MPL) in the scoped LICENSE and manifest `license` fields? |
 | **Allowed Licenses** | Does the repository strictly use a license from a user-provided allowlist array? |
 
 ### Lifecycle in plain language
@@ -119,7 +119,7 @@ stateDiagram-v2
 | **Chain** | GenLayer Intelligent Contract (Python), StudioNet |
 | **Wallet** | genlayer-js + viem + MetaMask |
 | **Consensus** | GenVM Nondeterministic Web Fetches & Multi-Validator Consensus |
-| **Tests** | pytest + gltest (18/18 Direct Integration Tests passing) |
+| **Tests** | pytest + gltest (23/23 Direct Integration Tests passing) |
 
 
 
@@ -157,7 +157,7 @@ node scripts/verify_payout.mjs 0x655c4fA424c900fF57F4B9B4E58049ae83EecCAe
 
 Unlike Alpha Court, LicenseLock natively transfers GEN from the Intelligent Contract to the EOA using `emit_transfer()`. This is not a keeper illusion.
 
-We provide a dedicated verification script ([`scripts/verify_payout.mjs`](file:///d:/licenselock/scripts/verify_payout.mjs)) connecting via `viem` to the GenLayer StudioNet RPC to query on-chain `eth_getBalance` deltas:
+We provide a dedicated verification script ([`scripts/verify_payout.mjs`](./scripts/verify_payout.mjs)) connecting via `viem` to the GenLayer StudioNet RPC to query on-chain `eth_getBalance` deltas:
 
 ```bash
 node scripts/verify_payout.mjs 0x655c4fA424c900fF57F4B9B4E58049ae83EecCAe
