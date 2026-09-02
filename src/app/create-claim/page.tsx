@@ -65,6 +65,9 @@ export default function CreateClaim() {
     if (!commit) {
       return "Commit hash cannot be empty.";
     }
+    if (!/^[0-9a-fA-F]{40}$/.test(commit) || commit.toLowerCase() === "0".repeat(40)) {
+      return "Commit must be an immutable 40-character hexadecimal SHA (all-zero and branch names are forbidden).";
+    }
 
     if (claimData.claimType === "ALLOWED_LICENSE_SET" && claimData.allowed_licenses.length === 0) {
       return "Please specify at least one allowed SPDX license.";

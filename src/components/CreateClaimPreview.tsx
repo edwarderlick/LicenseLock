@@ -46,10 +46,11 @@ export default function CreateClaimPreview({
         checkFile("LICENSE");
         checkFile("README.md");
       } else if (claimData.claimType === "NO_COPYLEFT") {
-        setFileStatus({ "LICENSE": "checking", "package.json": "checking", "Cargo.toml": "checking" });
+        setFileStatus({ "LICENSE": "checking", "package.json": "checking", "Cargo.toml": "checking", "pyproject.toml": "checking" });
         checkFile("LICENSE");
         checkFile("package.json");
         checkFile("Cargo.toml");
+        checkFile("pyproject.toml");
       } else if (claimData.claimType === "ALLOWED_LICENSE_SET") {
         setFileStatus({ "LICENSE": "checking" });
         checkFile("LICENSE");

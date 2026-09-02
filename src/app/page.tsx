@@ -27,7 +27,7 @@ export default function Home() {
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl relative z-10 mb-12">
               A neutral payout gate for open-source license claims. Lock GEN in
-              escrow against specific, checkable repo commits. Decentralized validators fetch root LICENSE and manifest files to settle payouts automatically.
+              escrow against immutable 40-character commit SHAs. Decentralized validators execute fail-closed mechanical verification across scoped license and manifest files before settling payouts.
             </p>
             <div className="flex flex-wrap items-center gap-6 relative z-10">
               <Link
@@ -64,7 +64,7 @@ export default function Home() {
                 GENVM CONSENSUS
               </span>
               <span className="font-code-sm text-code-sm text-primary-fixed truncate">
-                Fetches root LICENSE and manifests at specific commit
+                Fail-closed verification of scoped license and manifests
               </span>
             </div>
           </div>
@@ -72,14 +72,14 @@ export default function Home() {
         {/* Ticker Section */}
         <div className="bg-surface-container py-4 overflow-hidden relative">
           <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] gap-8 font-code-sm text-code-sm text-on-surface-variant">
-            <span>// FETCHING ROOT LICENSE AT COMMIT</span>
-            <span>// EVALUATING REPOSITORY MANIFESTS</span>
-            <span>// RESOLVING SPDX IDENTIFIERS</span>
-            <span>// EXECUTING SMART ESCROWS</span>
-            <span>// FETCHING ROOT LICENSE AT COMMIT</span>
-            <span>// EVALUATING REPOSITORY MANIFESTS</span>
-            <span>// RESOLVING SPDX IDENTIFIERS</span>
-            <span>// EXECUTING SMART ESCROWS</span>
+            <span>// FAIL-CLOSED REPOSITORY SCOPE</span>
+            <span>// IMMUTABLE 40-HEX COMMIT SHA REQUIRED</span>
+            <span>// INSPECTING EVERY APPLICABLE MANIFEST</span>
+            <span>// REJECTING UNAVAILABLE EVIDENCE</span>
+            <span>// FAIL-CLOSED REPOSITORY SCOPE</span>
+            <span>// IMMUTABLE 40-HEX COMMIT SHA REQUIRED</span>
+            <span>// INSPECTING EVERY APPLICABLE MANIFEST</span>
+            <span>// REJECTING UNAVAILABLE EVIDENCE</span>
           </div>
         </div>
         {/* 3 CLAIM TYPES SECTION */}

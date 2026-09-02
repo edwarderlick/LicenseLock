@@ -8,7 +8,7 @@ def main():
     client = gl.create_client(gl.studionet, account=account)
     print(f"Deployer account address: {account.address}", flush=True)
     
-    with open("contracts/licenselock.py", "r", encoding="utf-8") as f:
+    with open("contracts/licenselock_min.py", "r", encoding="utf-8") as f:
         code = f.read()
 
     print("Deploying LicenseLock contract to StudioNet...", flush=True)

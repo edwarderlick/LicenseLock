@@ -169,28 +169,42 @@ export default function CreateClaimSetup({
 </div>
 <div className="flex flex-col gap-2">
 <div className="flex justify-between items-end">
-<label className="font-label-caps text-label-caps text-tertiary-fixed-dim tracking-widest" htmlFor="commit_hash">Commit Hash (40-char)</label>
-<span className="font-code-sm text-[10px] text-tertiary-fixed-dim bg-surface-container px-2 py-0.5 border border-outline/20">VER: SHA-1</span>
+<label className="font-label-caps text-label-caps text-tertiary-fixed-dim tracking-widest" htmlFor="commit_hash">Immutable Commit SHA (40-char hex)</label>
+<span className="font-code-sm text-[10px] text-tertiary-fixed-dim bg-surface-container px-2 py-0.5 border border-outline/20">FAIL-CLOSED: 40-HEX ONLY</span>
 </div>
 <div className="relative flex items-center group">
 <span className="material-symbols-outlined absolute left-4 text-outline/50 group-focus-within:text-primary-fixed transition-colors">tag</span>
 <input 
-  className="w-full bg-surface border border-outline/30 text-body-md text-on-surface py-3 pl-12 pr-4 focus:outline-none focus:border-primary-fixed transition-colors font-code-sm placeholder-outline/30 uppercase tracking-widest" 
+  className={`w-full bg-surface border text-body-md text-on-surface py-3 pl-12 pr-4 focus:outline-none transition-colors font-code-sm placeholder-outline/30 tracking-widest ${
+    claimData.commit && !/^[0-9a-fA-F]{40}$/.test(claimData.commit.trim()) 
+      ? 'border-error focus:border-error' 
+      : 'border-outline/30 focus:border-primary-fixed'
+  }`} 
   id="commit_hash" 
   maxLength={40} 
-  placeholder="e.g. 7d8f9e..." 
+  placeholder="e.g. 7d8f9e0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e" 
   type="text" 
   value={claimData.commit}
   onChange={(e) => setClaimData({...claimData, commit: e.target.value})}
 />
 <div className="absolute bottom-0 left-0 h-[1px] bg-primary-fixed w-0 group-focus-within:w-full transition-all duration-300"></div>
 </div>
+{claimData.commit && !/^[0-9a-fA-F]{40}$/.test(claimData.commit.trim()) && (
+  <p className="font-code-sm text-xs text-error">
+    Commit must be a full 40-character hexadecimal SHA (mutable branch names like &apos;main&apos; or short SHAs are rejected).
+  </p>
+)}
+{claimData.commit && claimData.commit.trim().toLowerCase() === "0".repeat(40) && (
+  <p className="font-code-sm text-xs text-error">
+    All-zero SHA is invalid and will be rejected by consensus.
+  </p>
+)}
 </div>
 
 <div className="flex flex-col gap-2">
 <div className="flex justify-between items-end">
 <label className="font-label-caps text-label-caps text-tertiary-fixed-dim tracking-widest" htmlFor="target_directory">Target Directory (Optional)</label>
-<span className="font-code-sm text-[10px] text-tertiary-fixed-dim bg-surface-container px-2 py-0.5 border border-outline/20">SUBDIR / MONOREPO</span>
+<span className="font-code-sm text-[10px] text-tertiary-fixed-dim bg-surface-container px-2 py-0.5 border border-outline/20">FAIL-CLOSED SCOPE</span>
 </div>
 <div className="relative flex items-center group">
 <span className="material-symbols-outlined absolute left-4 text-outline/50 group-focus-within:text-primary-fixed transition-colors">folder</span>
@@ -210,10 +224,25 @@ export default function CreateClaimSetup({
 </section>
 {/* Action Footer */}
 <div className="flex justify-end pt-4 border-t border-outline/30 mt-4">
-<button onClick={onNext} className="bg-primary-fixed text-on-primary-fixed font-code-sm text-code-sm font-bold px-8 py-3 flex items-center gap-2 hover:bg-primary-fixed-dim transition-colors">
-<span>PROCEED TO VALIDATION</span>
-<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-</button>
+{(() => {
+  const commitTrimmed = (claimData.commit || "").trim();
+  const isCommitValid = /^[0-9a-fA-F]{40}$/.test(commitTrimmed) && commitTrimmed.toLowerCase() !== "0".repeat(40);
+  const canProceed = Boolean(claimData.repo && isCommitValid);
+  return (
+    <button 
+      onClick={onNext} 
+      disabled={!canProceed}
+      className={`font-code-sm text-code-sm font-bold px-8 py-3 flex items-center gap-2 transition-colors ${
+        canProceed 
+          ? "bg-primary-fixed text-on-primary-fixed hover:bg-primary-fixed-dim cursor-pointer" 
+          : "bg-surface-container text-tertiary-fixed-dim border border-outline/30 cursor-not-allowed opacity-60"
+      }`}
+    >
+      <span>PROCEED TO VALIDATION</span>
+      <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+    </button>
+  );
+})()}
 </div>
 </div>
 </div>
