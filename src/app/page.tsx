@@ -98,7 +98,7 @@ export default function Home() {
               SPDX Match
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-12 flex-1">
-              Mechanical string verification of standard SPDX license identifiers between the root LICENSE file and README.
+              Mechanical string verification of standard SPDX license identifiers between the target LICENSE file and README.
             </p>
             <div className="flex items-center justify-between">
               <span className="font-code-sm text-code-sm text-on-surface bg-surface-container-highest px-3 py-1 rounded-sm shadow-sm">
@@ -123,7 +123,7 @@ export default function Home() {
               No Copyleft
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-12 flex-1">
-              Inspects root LICENSE and package manifests (package.json, pyproject.toml, Cargo.toml) to ensure no viral copyleft licenses (e.g. GPL, AGPL) exist.
+              Inspects target LICENSE and package manifests (package.json, pyproject.toml, Cargo.toml) to ensure no viral copyleft licenses (e.g. GPL, AGPL) exist.
             </p>
             <div className="flex items-center justify-between">
               <span className="font-code-sm text-code-sm text-on-surface bg-surface-container-highest px-3 py-1 rounded-sm shadow-sm">
@@ -148,7 +148,7 @@ export default function Home() {
               Allowed Set
             </h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-12 flex-1">
-              Checks root LICENSE and package manifests against an explicit whitelist of acceptable SPDX identifiers provided by the funder.
+              Checks target LICENSE and package manifests against an explicit whitelist of acceptable SPDX identifiers provided by the funder.
             </p>
             <div className="flex items-center justify-between">
               <span className="font-code-sm text-code-sm text-on-surface bg-surface-container-highest px-3 py-1 rounded-sm shadow-sm">

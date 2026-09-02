@@ -29,7 +29,7 @@ export default function HowItWorks() {
         How Verification <br/><span className="text-on-surface-variant">Operates</span>
 </h1>
 <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mt-4 border-l border-primary-fixed pl-6">
-        LicenseLock uses GenLayer decentralized validators to fetch root LICENSE and manifest files at a specified commit, performing mechanical string comparisons to resolve open-source license claims into deterministic payout outcomes.
+        LicenseLock uses GenLayer decentralized validators to fetch precise LICENSE and manifest files scoped to the target directory at a specified commit, performing mechanical string comparisons to resolve open-source license claims into deterministic payout outcomes.
       </p>
 </div>
 {/* Prominent Callout */}
@@ -100,7 +100,7 @@ export default function HowItWorks() {
 <div className="font-label-caps text-label-caps text-on-surface-variant mb-2">CLAIM TYPE 02</div>
 <h3 className="font-headline-sm text-headline-sm text-on-background">No Copyleft Found</h3>
 <p className="font-body-md text-body-md text-on-surface-variant mt-4">
-                        Scans root LICENSE and manifests (package.json, pyproject.toml, Cargo.toml) to ensure no viral copyleft licenses (like GPL, AGPL) are present.
+                        Scans target LICENSE and manifests (package.json, pyproject.toml, Cargo.toml) to ensure no viral copyleft licenses (like GPL, AGPL) are present.
                     </p>
 </div>
 <div className="p-6 flex flex-col gap-6 flex-1">
@@ -203,7 +203,7 @@ export default function HowItWorks() {
 <h4 className="font-headline-sm text-headline-sm text-on-background uppercase tracking-tight">Resolving</h4>
 </div>
 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                    Validators fetch root LICENSE and manifest files at the exact commit and evaluate the policy assertion.
+                    Validators fetch precisely scoped LICENSE and manifest files at the exact commit and evaluate the policy assertion.
                 </p>
 {/* Terminal decorative */}
 <div className="mt-8 bg-background border border-outline/20 p-3 font-code-sm text-code-sm text-primary-fixed opacity-80 group-hover:opacity-100 transition-opacity">

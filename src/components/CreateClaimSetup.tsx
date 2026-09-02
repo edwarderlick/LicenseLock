@@ -110,7 +110,7 @@ export default function CreateClaimSetup({
 <span className="font-label-caps text-label-caps text-outline px-2 py-1 border border-outline/20 bg-surface-container">A1</span>
 </div>
 <h3 className={`font-body-md text-body-md font-bold mb-2 transition-colors ${claimType === 'SPDX_MATCH' ? 'text-primary-fixed' : 'text-on-surface'}`}>SPDX Match</h3>
-<p className="font-code-sm text-code-sm text-tertiary-fixed-dim">Checks if the root LICENSE file matches the README identifier.</p>
+<p className="font-code-sm text-code-sm text-tertiary-fixed-dim">Checks if the target LICENSE file matches the README identifier.</p>
 </label>
 
 {/* Option 2 */}
@@ -138,7 +138,7 @@ export default function CreateClaimSetup({
 <span className="font-label-caps text-label-caps text-outline px-2 py-1 border border-outline/20 bg-surface-container">A3</span>
 </div>
 <h3 className={`font-body-md text-body-md font-bold mb-2 transition-colors ${claimType === 'ALLOWED_LICENSE_SET' ? 'text-primary-fixed' : 'text-on-surface'}`}>Allowed Licenses</h3>
-<p className="font-code-sm text-code-sm text-tertiary-fixed-dim">Passes only if detected root LICENSE matches an approved list of SPDX identifiers.</p>
+<p className="font-code-sm text-code-sm text-tertiary-fixed-dim">Passes only if detected target LICENSE matches an approved list of SPDX identifiers.</p>
 </label>
 </div>
 </div>

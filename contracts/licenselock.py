@@ -91,6 +91,8 @@ class LicenseLock(gl.Contract):
         self.next_claim_id += u256(1)
 
         clean_dir = str(target_directory or "").strip().strip("/")
+        if ".." in clean_dir:
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} target_directory cannot contain '..'")
 
         self.claims[claim_id] = Claim(
             id=claim_id,
@@ -203,7 +205,7 @@ class LicenseLock(gl.Contract):
         target_repo = claim.repo
         target_commit = claim.commit
         
-        if not _is_immutable_commit_sha(target_commit):
+        if not LicenseLock._is_immutable_commit_sha(target_commit):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} Stored commit is not an immutable 40-character hex SHA")
 
         target_claim_type = claim.claim_type
@@ -450,7 +452,17 @@ class LicenseLock(gl.Contract):
                     elif m_res["status"] != "MISSING":
                         manifest_found_any = True
                         declared_lic = parse_manifest_declared_license(manifest_path, m_res["raw"])
-                        m_excerpt = f'"license": "{declared_lic}"' if declared_lic else ""
+                        
+                        def extract_manifest_excerpt(path: str, raw: str, declared: str) -> str:
+                            if not declared:
+                                return ""
+                            if path.endswith("package.json"):
+                                m = re.search(r'"license"\s*:\s*(?:"[^"]+"|\{[^}]*\})', raw)
+                                return m.group(0) if m else f'"license": "{declared}"'
+                            m = re.search(r'^\s*license\s*=\s*.+$', raw, re.MULTILINE | re.IGNORECASE)
+                            return m.group(0).strip() if m else f'license = "{declared}"'
+
+                        m_excerpt = extract_manifest_excerpt(manifest_path, m_res["raw"], declared_lic)
                         manifest_evidence_files.append({
                             "path": manifest_path,
                             "excerpt": m_excerpt,

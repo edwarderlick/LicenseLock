@@ -39,6 +39,12 @@ Sybil Court was critiqued for unauthenticated interfaces and disjointed mechanic
 **3. Scoped, Accurate Parsing without Scope Creep (Provider Court Resolution)**
 To prevent false positives, `NO_COPYLEFT` strictly checks declared license headers in root `LICENSE` files and parses only the `"license"` field in package manifests (`package.json`, `pyproject.toml`, `Cargo.toml`). It never naively greps raw body texts (preventing false fails on words like "application") and ignores lockfiles.
 
+**4. Fail-closed repository scope (this steward request)**
+create_claim requires an immutable 40-character hex SHA (no main/HEAD/short/all-zero).
+A declared target_directory never falls back to repo root; missing prefix → INSUFFICIENT + refund.
+404 is MISSING; 429/5xx/network is UNAVAILABLE; UNAVAILABLE never PASSes.
+NO_COPYLEFT inspects package.json, Cargo.toml, and pyproject.toml before payout.
+
 ---
 
 ## What LicenseLock is
@@ -56,7 +62,7 @@ To prevent false positives, `NO_COPYLEFT` strictly checks declared license heade
 1. Someone **creates a claim**, locking a native GEN escrow against a specific GitHub commit and policy. State is **OPEN**.
 2. The user (or any authorized party) triggers **Execute Resolution**.
 3. GenLayer validators execute the Nondeterministic Virtual Machine (`gl.nondet`):
-    - They fetch root license and manifest files at the exact commit (with robust case-insensitive fallback chains and HTTP 429/5xx exponential backoffs).
+    - They fetch files precisely at the exact immutable commit SHA, scoped strictly to the target directory with no root fallback.
     - They evaluate the declared license headers and manifest fields deterministically.
 4. Consensus is reached and state transitions:
     - **PASS:** The protocol deducts a 2.5% protocol fee to the treasury and transfers the remainder to the recipient. State: **RESOLVED**.
