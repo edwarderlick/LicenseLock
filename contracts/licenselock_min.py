@@ -215,6 +215,14 @@ class LicenseLock(gl.Contract):
             if mpl_match:
                 return (True, mpl_match.group(0))
             return (False, '')
+        def extract_manifest_excerpt(path: str, raw: str, declared: str) -> str:
+            if not declared:
+                return ''
+            if path.endswith('package.json'):
+                m = re.search('"license"\\s*:\\s*(?:"[^"]+"|\\{[^}]*\\})', raw)
+                return m.group(0) if m else f'"license": "{declared}"'
+            m = re.search('^\\s*license\\s*=\\s*.+$', raw, re.MULTILINE | re.IGNORECASE)
+            return m.group(0).strip() if m else f'license = "{declared}"'
         def parse_manifest_declared_license(manifest_path: str, raw_text: str) -> str:
             if not raw_text:
                 return ''
@@ -305,14 +313,6 @@ class LicenseLock(gl.Contract):
                     elif m_res['status'] != 'MISSING':
                         manifest_found_any = True
                         declared_lic = parse_manifest_declared_license(manifest_path, m_res['raw'])
-                        def extract_manifest_excerpt(path: str, raw: str, declared: str) -> str:
-                            if not declared:
-                                return ''
-                            if path.endswith('package.json'):
-                                m = re.search('"license"\\s*:\\s*(?:"[^"]+"|\\{[^}]*\\})', raw)
-                                return m.group(0) if m else f'"license": "{declared}"'
-                            m = re.search('^\\s*license\\s*=\\s*.+$', raw, re.MULTILINE | re.IGNORECASE)
-                            return m.group(0).strip() if m else f'license = "{declared}"'
                         m_excerpt = extract_manifest_excerpt(manifest_path, m_res['raw'], declared_lic)
                         manifest_evidence_files.append({'path': manifest_path, 'excerpt': m_excerpt, 'status': 'PROCESSED'})
                         manifest_raw_map[manifest_path] = m_res['raw']
